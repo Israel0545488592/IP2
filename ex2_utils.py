@@ -45,12 +45,12 @@ def conv2D(in_image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     if len(kernel.shape) < 2: kernel = kernel.reshape(1, len(kernel))
     row_pad, col_pad = kernel.shape[0] // 2, kernel.shape[1] // 2
 
-    pad_img = np.pad(in_image, ((kernel.shape[0], kernel.shape[0]), (kernel.shape[1], kernel.shape[1])), 'reflect')
+    pad_img = np.pad(in_image, ((row_pad, row_pad), (col_pad, col_pad)), 'reflect')
     res = np.zeros_like(in_image)
 
     for res_row, res_col in product(range(in_image.shape[0]), range(in_image.shape[1])):
         for ker_row, ker_col in product(range(kernel.shape[0]), range(kernel.shape[1])):
-            res[res_row, res_col] += kernel[ker_row, ker_col] * pad_img[res_row + ker_row + row_pad + 1][res_col + ker_col + col_pad + 1]
+            res[res_row, res_col] += kernel[ker_row, ker_col] * pad_img[res_row + ker_row][res_col + ker_col]
 
     return res
 
@@ -152,12 +152,12 @@ def bilateral_filter_implement(in_image: np.ndarray, k_size: int, sigma_color: f
 
     for row, col in product(range(my_imp.shape[0]), range(my_imp.shape[1])):
 
-        nei =  pad_mat[row : row + k_size, col : col + k_size]
+        neibourhood =  pad_mat[row : row + k_size, col : col + k_size]
         
-        gaus_color = norm.pdf(nei, loc = in_image[row, col], scale = sigma_color)
+        gaus_color = norm.pdf(neibourhood, loc = in_image[row, col], scale = sigma_color)
         
         bilat_ker = gaus_spase * gaus_color
 
-        my_imp[row, col] = int((bilat_ker * nei).sum() / bilat_ker.sum())
+        my_imp[row, col] = int((bilat_ker * neibourhood).sum() / bilat_ker.sum())
 
     return cv2.bilateralFilter(in_image, k_size, sigma_color, sigma_space, borderType = cv2.BORDER_REPLICATE), my_imp
