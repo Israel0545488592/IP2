@@ -144,4 +144,20 @@ def bilateral_filter_implement(in_image: np.ndarray, k_size: int, sigma_color: f
     :return: OpenCV implementation, my implementation
     """
 
-    return
+    pad_mat = cv2.copyMakeBorder(in_image, k_size // 2, k_size // 2, k_size // 2, k_size // 2, borderType = cv2.BORDER_REPLICATE)
+    my_imp = np.zeros_like(in_image)
+
+    gaus_spase = cv2.getGaussianKernel(k_size, sigma_space)
+    gaus_spase = np.outer(gaus_spase, gaus_spase)
+
+    for row, col in product(range(my_imp.shape[0]), range(my_imp.shape[1])):
+
+        nei =  pad_mat[row : row + k_size, col : col + k_size]
+        
+        gaus_color = norm.pdf(nei, loc = in_image[row, col], scale = sigma_color)
+        
+        bilat_ker = gaus_spase * gaus_color
+
+        my_imp[row, col] = int((bilat_ker * nei).sum() / bilat_ker.sum())
+
+    return cv2.bilateralFilter(in_image, k_size, sigma_color, sigma_space, borderType = cv2.BORDER_REPLICATE), my_imp
