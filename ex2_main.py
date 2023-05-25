@@ -128,8 +128,8 @@ def houghDemo():
     print("Hough Time[Mine]: {:.3f} sec".format(time.time() - st))
     # OpenCV
     st = time.time()
-    cv2_cir = cv2.HoughCircles((img * 255).astype(np.uint8), cv2.HOUGH_GRADIENT, 1, minDist=30, param1=500,
-                               param2=80, minRadius=min_r, maxRadius=max_r)
+    cv2_cir = cv2.HoughCircles((img * 255).astype(np.uint8), cv2.HOUGH_GRADIENT, 1,20,param1=50,
+                               param2=30, minRadius=min_r, maxRadius=max_r)
     print("Hough Time[CV]: {:.3f} sec".format(time.time() - st))
 
     fig, ax = plt.subplots()
@@ -138,8 +138,7 @@ def houghDemo():
     for c in hough_rings:
         circle1 = plt.Circle((c[0], c[1]), c[2], color='r', fill=False, linewidth=3)
         ax.add_artist(circle1)
-    plt.show()
-    return
+
     # OpenCV
     for c in cv2_cir[0]:
         circle1 = plt.Circle((c[0], c[1]), c[2], color='g', fill=False, linewidth=2)
@@ -161,11 +160,11 @@ def biliteralFilterDemo():
 
 def main():
     print("ID:", myID())
-    conv1Demo()
-    conv2Demo()
-    derivDemo()
-    blurDemo()
-    edgeDemo()
+    #conv1Demo()
+    #conv2Demo()
+    #derivDemo()
+    #blurDemo()
+    #edgeDemo()
     houghDemo()
     biliteralFilterDemo()
 
