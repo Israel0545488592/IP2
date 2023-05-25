@@ -135,8 +135,8 @@ def houghCircle(img: np.ndarray, min_radius: int, max_radius: int) -> list:
     """
 
     edges = np.argwhere(cv2.Canny((255 * img).astype(np.uint8), 530, 100))
-    radii = range(min_radius, max_radius, 7)
-    angles = range(0, 360, 6)
+    radii = range(min_radius, max_radius)
+    angles = range(0, 360, 3)
     hough_space = product(angles, radii)
     circles = {}
 
@@ -152,7 +152,7 @@ def houghCircle(img: np.ndarray, min_radius: int, max_radius: int) -> list:
             if circle in circles: circles[circle] += 1
             else: circles[circle] = 1
 
-    return sorted(circles, key = circles.__getitem__)[-70::2]
+    return sorted(circles, key = circles.__getitem__)[-15:]
 
 
 
