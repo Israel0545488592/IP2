@@ -115,12 +115,12 @@ def edgeDemo():
 
 
 def houghDemo():
-    img = cv2.imread('coins.jpg', cv2.IMREAD_GRAYSCALE) / 255
+    img = cv2.imread('input/coins.jpg', cv2.IMREAD_GRAYSCALE) / 255
     min_r, max_r = 50, 100
 
     # # TEST WITH YOUR IMPLEMENT ONLY
-    # img = cv2.imread('input/pool_balls.jpg', cv2.IMREAD_GRAYSCALE) / 255
-    # min_r, max_r = 10, 20
+    #img = cv2.imread('input/pool_balls.jpg', cv2.IMREAD_GRAYSCALE) / 255
+    #min_r, max_r = 10, 20
 
     # Mine
     st = time.time()
@@ -147,7 +147,7 @@ def houghDemo():
 
 
 def biliteralFilterDemo():
-    img = cv2.imread('/home/hay/Dropbox/master_degree/image processing/Ex2/boxMan.jpg', cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread('input/boxMan.jpg', cv2.IMREAD_GRAYSCALE)
     # cv2.imwrite("original_image_grayscale.jpg", img)
 
     filtered_image_CV, filtered_image_my = bilateral_filter_implement(img, 9, 8.0, 1.0)
@@ -164,10 +164,9 @@ def main():
     #conv2Demo()
     #derivDemo()
     #blurDemo()
-    edgeDemo()
-    # houghDemo()
+    #edgeDemo()
+    houghDemo()
     #biliteralFilterDemo()
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__main__': main()

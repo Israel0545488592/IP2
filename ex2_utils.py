@@ -2,6 +2,7 @@ from scipy.stats import norm
 import numpy as np
 import cv2
 from itertools import product
+from copy import copy
 from typing import Tuple
 
 LAPLUS_KER = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
@@ -121,6 +122,7 @@ def edgeDetectionZeroCrossingLOG(img: np.ndarray) -> np.ndarray:
     return np.where(np.abs(LoG_filtered_img) < 0.1, 1, 0)
 
 
+
 def houghCircle(img: np.ndarray, min_radius: int, max_radius: int) -> list:
     """
     Find Circles in an image using a Hough Transform algorithm extension
@@ -132,7 +134,26 @@ def houghCircle(img: np.ndarray, min_radius: int, max_radius: int) -> list:
                 [(x,y,radius),(x,y,radius),...]
     """
 
-    return
+    edges = np.argwhere(cv2.Canny((255 * img).astype(np.uint8), 530, 100))
+    radii = range(min_radius, max_radius, 7)
+    angles = range(0, 360, 6)
+    hough_space = product(angles, radii)
+    circles = {}
+
+    for row, col in edges:
+        for ang, rad in copy(hough_space):
+
+            cnt_row = int(col - rad * np.sin(np.deg2rad(ang)))
+            cnt_col = int(row - rad * np.cos(np.deg2rad(ang)))
+            circle = cnt_row, cnt_col, rad
+
+            if not (0 <= cnt_row < img.shape[0]) or not (0 <= cnt_col < img.shape[1]): continue
+
+            if circle in circles: circles[circle] += 1
+            else: circles[circle] = 1
+
+    return sorted(circles, key = circles.__getitem__)[-70::2]
+
 
 
 def bilateral_filter_implement(in_image: np.ndarray, k_size: int, sigma_color: float, sigma_space: float) -> Tuple[np.ndarray]:
