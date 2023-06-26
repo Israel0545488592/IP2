@@ -14,7 +14,6 @@ def myID() -> int:
     Return my ID (not the friend's ID I copied from)
     :return: int
     """
-
     return 212403679
 
 
@@ -25,10 +24,9 @@ def conv1D(in_signal: np.ndarray, k_size: np.ndarray) -> np.ndarray:
     :param k_size: 1-D array as a kernel
     :return: The convolved array
     """
-
     res = np.zeros(len(in_signal) + len(k_size) - 1)
 
-    for res_ind, ker_ind in product(range(len(res)), range(len(k_size))):
+    for res_ind, ker_ind in np.ndindex((len(res), len(k_size))):
         if 0 <= res_ind - ker_ind < len(in_signal):
             res[res_ind] += k_size[ker_ind] * in_signal[res_ind - ker_ind]
 
@@ -42,16 +40,13 @@ def conv2D(in_image: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     :param kernel: A kernel
     :return: The convolved image
     """
-
     if len(kernel.shape) < 2: kernel = kernel.reshape(1, len(kernel))
-    row_pad, col_pad = kernel.shape[0] // 2, kernel.shape[1] // 2
 
-    pad_img = np.pad(in_image, ((row_pad, row_pad), (col_pad, col_pad)), 'reflect')
+    pad_img = np.pad(in_image, tuple((dim // 2,) * 2 for dim in kernel.shape), 'reflect')
     res = np.zeros_like(in_image)
 
-    for res_row, res_col in product(range(in_image.shape[0]), range(in_image.shape[1])):
-        for ker_row, ker_col in product(range(kernel.shape[0]), range(kernel.shape[1])):
-            res[res_row, res_col] += kernel[ker_row, ker_col] * pad_img[res_row + ker_row][res_col + ker_col]
+    for row, col in np.ndindex(in_image.shape):
+        res[row, col] = np.sum(kernel * pad_img[row : row + kernel.shape[0], col : col + kernel.shape[1]])       
 
     return res
 
@@ -62,7 +57,6 @@ def convDerivative(in_image: np.ndarray) -> Tuple[np.ndarray]:
     :param in_image: Grayscale iamge
     :return: (directions, magnitude)
     """
-
     col_drv = cv2.filter2D(in_image, -1, np.array([-1, 0, 1]).reshape(3, 1))
     row_drv = cv2.filter2D(in_image, -1, np.array([-1, 0, 1]))
 
@@ -72,12 +66,6 @@ def convDerivative(in_image: np.ndarray) -> Tuple[np.ndarray]:
     return grad_dir_trans(row_drv, col_drv), grad_mag_trans(row_drv, col_drv)
 
 
-def gaus_ker(size: int, std: int) -> np.ndarray:
-
-    ker = np.diff(norm.cdf(np.linspace(-size * std, size * std, size + 1)))
-    return ker.reshape(size, 1) / ker.sum()
-
-
 def blurImage1(in_image: np.ndarray, k_size: int) -> np.ndarray:
     """
     Blur an image using a Gaussian kernel
@@ -85,8 +73,11 @@ def blurImage1(in_image: np.ndarray, k_size: int) -> np.ndarray:
     :param k_size: Kernel size
     :return: The Blurred image
     """
+    std = 0.2
+    gau_ker = norm.pdf(np.linspace(-k_size * std, k_size * std, k_size + 1))
+    gau_ker /= gau_ker.sum()
 
-    return conv2D(in_image, gaus_ker(k_size, 0.2))
+    return conv2D(in_image, gau_ker)
 
 
 def blurImage2(in_image: np.ndarray, k_size: int) -> np.ndarray:
@@ -96,7 +87,6 @@ def blurImage2(in_image: np.ndarray, k_size: int) -> np.ndarray:
     :param k_size: Kernel size
     :return: The Blurred image
     """
-
     return cv2.filter2D(in_image, -1, cv2.getGaussianKernel(k_size, 0.2), borderType = cv2.BORDER_REPLICATE)
 
 
@@ -106,7 +96,6 @@ def edgeDetectionZeroCrossingSimple(img: np.ndarray) -> np.ndarray:
     :param img: Input image
     :return: Edge matrix
     """
-
     return np.where(np.abs(cv2.filter2D(img, -1, LAPLUS_KER)) < 0.01, 1, 0)
 
 
@@ -116,7 +105,6 @@ def edgeDetectionZeroCrossingLOG(img: np.ndarray) -> np.ndarray:
     :param img: Input image
     :return: Edge matrix
     """
-
     LoG_filtered_img = cv2.filter2D(cv2.filter2D(img, -1, LAPLUS_KER), -1, cv2.getGaussianKernel(3, 0.2))
 
     return np.where(np.abs(LoG_filtered_img) < 0.1, 1, 0)
@@ -133,7 +121,6 @@ def houghCircle(img: np.ndarray, min_radius: int, max_radius: int) -> list:
     :return: A list containing the detected circles,
                 [(x,y,radius),(x,y,radius),...]
     """
-
     edges = np.argwhere(cv2.Canny((255 * img).astype(np.uint8), 530, 100))
     radii = range(min_radius, max_radius)
     angles = range(0, 360, 3)
@@ -164,14 +151,13 @@ def bilateral_filter_implement(in_image: np.ndarray, k_size: int, sigma_color: f
     :param sigma_space: represents the filter sigma in the coordinate.
     :return: OpenCV implementation, my implementation
     """
-
     pad_mat = cv2.copyMakeBorder(in_image, k_size // 2, k_size // 2, k_size // 2, k_size // 2, borderType = cv2.BORDER_REPLICATE)
     my_imp = np.zeros_like(in_image)
 
     gaus_spase = cv2.getGaussianKernel(k_size, sigma_space)
     gaus_spase = np.outer(gaus_spase, gaus_spase)
 
-    for row, col in product(range(my_imp.shape[0]), range(my_imp.shape[1])):
+    for row, col in np.ndindex(in_image.shape):
 
         neibourhood =  pad_mat[row : row + k_size, col : col + k_size]
         
